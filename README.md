@@ -21,12 +21,18 @@ Or install it yourself as:
 Arguments taken are:
 
 * file        - path to the fixed width file
-* start       - a string of positions postitions
+* start       - a string of start postitions
 * stop        - a string of stop positions
 * header      - a string of column names
 * delimiter   - data delimiter of choice, defaults to comma
 
-Note that the stop positions are the column positions in the actual file. The offset is calculated by the Gem so you don't have to do it.
+Note that the start and stop positions are the column positions in the actual file. The offset is calculated by the Gem so you don't have to do it manually.
+
+```ruby
+  Fixedwidth.parse(start:  '1,9,17,44,46', stop: '8,16,36,45,63')
+  Fixedwidth.column_positions # Array of substring positions
+  # => [[0, 8], [8, 8], [16, 20], [43, 2], [45, 18]]
+```
 
 Example
 
