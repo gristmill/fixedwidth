@@ -50,7 +50,7 @@ module Fixedwidth
     end
 
     def to_hash
-      Fixedwidth.header.zip(to_a).inject({}){ |sum, d| sum.merge(Hash[d[0].to_sym, d[1]]) }
+      Fixedwidth.header.zip(to_a).inject({}){ |i,(a,b)| i.merge(a.to_sym => b) }
     end
 
     def to_a
