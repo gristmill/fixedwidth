@@ -1,10 +1,20 @@
 require "fixedwidth/version"
+require 'csv'
 
 module Fixedwidth
   def self.parse(options)
     options[:delimiter] ||= ","
-    @options = options
-    @start, @stop, @header = nil
+    @options  = options
+    @options[:start]  = @options[:start].split(@options[:delimiter])
+    @options[:stop]   = @options[:stop].split(@options[:delimiter])
+    @options[:header] = @options[:header].split(@options[:delimiter])
+    @column_positions = []
+    start.zip(stop).each do |a,b|
+      a, b = a.to_i, b.to_i
+      a = a - 1
+      b = b - a
+      @column_positions << [a, b]
+    end
 
     if block_given?
       File.open(@options[:file]).each_line do |line|
@@ -14,31 +24,27 @@ module Fixedwidth
   end
 
   def self.start
-    @start ||= @options[:start].split(@options[:delimiter])
+    @options[:start]
   end
 
   def self.stop
-    @stop ||= @options[:stop].split(@options[:delimiter])
+    @options[:stop]
   end
 
   def self.header
-    @header ||= @options[:header].split(@options[:delimiter])
+    @options[:header]
   end
 
   def self.options
     @options
   end
 
-  def self.column_positions
-    [].tap do |positions|
-      start.zip(stop).each do |a,b|
-        a, b = a.to_i, b.to_i
-        a = a - 1
-        b = b-a
+  def self.nil_blanks?
+    @options[:nil_blanks]
+  end
 
-        positions << [a,b]
-      end
-    end
+  def self.column_positions
+    @column_positions
   end
 
   class Line
@@ -55,15 +61,18 @@ module Fixedwidth
     end
 
     def to_a
-      to_csv.split(Fixedwidth.options[:delimiter])
+      array = Fixedwidth.column_positions.map do |start, stop|
+        field = @line[start, stop]
+        field.strip!
+        if Fixedwidth.nil_blanks? && field.length == 0
+         field = nil
+        end
+        field
+      end
     end
 
     def to_csv
-      [].tap do |results|
-        Fixedwidth.column_positions.each do |start, stop|
-          results << @line[start, stop]
-        end
-      end.join(Fixedwidth.options[:delimiter]).gsub(/\s{2}/, '').split(Fixedwidth.options[:delimiter]).map(&:strip).join(Fixedwidth.options[:delimiter]) # TODO: Actually think about this!
+      CSV.generate_line(to_a, col_sep: Fixedwidth.options[:delimiter]).chomp
     end
   end
 end
