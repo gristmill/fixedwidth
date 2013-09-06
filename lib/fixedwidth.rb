@@ -3,6 +3,7 @@ require "fixedwidth/version"
 module Fixedwidth
   def self.parse(options)
     @options = options
+    @start, @stop, @header = nil
     @options[:delimiter] ||= ","
 
     if block_given?
