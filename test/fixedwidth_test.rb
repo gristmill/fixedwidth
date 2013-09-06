@@ -63,5 +63,12 @@ class FixedwidthTest < Test::Unit::TestCase
       end
     end
   end
+
+  def test_thread_safety
+    threads = []
+    threads << Thread.new { test_nil_as_blanks }
+    threads << Thread.new { test_fixedwidth_called_on_different_file }
+    threads.each { |t| t.join }
+  end
 end
 
