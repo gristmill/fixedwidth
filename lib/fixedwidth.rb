@@ -2,9 +2,9 @@ require "fixedwidth/version"
 
 module Fixedwidth
   def self.parse(options)
+    options[:delimiter] ||= ","
     @options = options
     @start, @stop, @header = nil
-    @options[:delimiter] ||= ","
 
     if block_given?
       File.open(@options[:file]).each_line do |line|
@@ -60,11 +60,10 @@ module Fixedwidth
 
     def to_csv
       [].tap do |results|
-        Fixedwidth.column_positions.each do |a,b|
-          results << @line[a,b]
+        Fixedwidth.column_positions.each do |start, stop|
+          results << @line[start, stop]
         end
       end.join(Fixedwidth.options[:delimiter]).gsub(/\s{2}/, '').split(Fixedwidth.options[:delimiter]).map(&:strip).join(Fixedwidth.options[:delimiter]) # TODO: Actually think about this!
     end
   end
-
 end

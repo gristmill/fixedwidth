@@ -35,5 +35,20 @@ class FixedwidthTest < Test::Unit::TestCase
       [:first, :last, :email, :blank, :phone].each { |header| assert line.to_hash.keys.include?(header) }
     end
   end
+
+  def test_fixedwidth_called_on_different_file
+    is_first = true
+    Fixedwidth.parse(file: File.dirname(__FILE__) +'/contacts_2.txt',
+                     start:  '1,8,16,35',
+                     stop:   '7,15,34,48',
+                     header: 'first,last,email,phone') do |line|
+      if is_first
+        assert_equal 'May  Jo,Smith,john@example.com,1-888-555-6666', line.to_csv
+        assert_equal ['May  Jo', 'Smith', 'john@example.com', '1-888-555-6666'], line.to_a
+        assert_equal Hash[first: "May  Jo", last: "Smith", email: "john@example.com", phone: "1-888-555-6666"], line.to_hash
+        is_first = false
+      end
+    end
+  end
 end
 
