@@ -6,10 +6,20 @@ module Fixedwidth
     @semaphore ||= Mutex.new  # This wouldn't be necessary if this was turned
     @semaphore.synchronize do # into a class instead of a module
       setup(options)
-      if block_given?
-        File.open(@options[:file]).each_line do |line|
+      if @options[:file].present?
+        if block_given?
+          File.open(@options[:file]).each_line do |line|
+            yield Line.new(line)
+          end
+        else
+          raise
+        end
+      elsif @options[:string].present?
+        @options[:string].each_line do |line|
           yield Line.new(line)
         end
+      else
+        raise
       end
     end
   end
